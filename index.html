@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bliżej siebie</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:#100d0a;min-height:100vh;}
+body{color:#f0e0c0;font-family:'Cormorant Garamond',Georgia,serif;overflow-x:hidden;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:#c9a96e22;border-radius:2px;}
+
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.star{position:absolute;border-radius:50%;background:#f0e0c0;animation:twinkle var(–d) ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:var(–min);}50%{opacity:var(–max);transform:scale(1.3);}}
+.glow{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(80px);animation:drift 14s ease-in-out infinite;}
+.glow1{width:320px;height:320px;background:radial-gradient(circle,#c9a96e09,transparent 70%);top:-100px;right:-100px;}
+.glow2{width:220px;height:220px;background:radial-gradient(circle,#9b8ea807,transparent 70%);bottom:20%;left:-70px;animation-delay:-7s;}
+@keyframes drift{0%,100%{transform:translate(0,0);}50%{transform:translate(18px,28px);}}
+
+.app{min-height:100vh;padding-bottom:80px;position:relative;z-index:1;}
+
+/* HEADER */
+.header{padding:52px 24px 0;text-align:center;}
+.header-moon{font-size:26px;display:block;margin-bottom:10px;animation:moonFloat 5s ease-in-out infinite;}
+@keyframes moonFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.header-sup{font-size:10px;letter-spacing:0.3em;color:#c9a96e66;text-transform:uppercase;margin-bottom:6px;}
+.header-name{font-family:‘IM Fell English’,serif;font-size:36px;color:#f0e0c0;font-weight:400;line-height:1.1;margin-bottom:4px;}
+.header-tagline{font-size:13px;color:#c9a96e44;font-style:italic;margin-bottom:28px;}
+
+/* STATS — only streak + done */
+.stats-row{display:flex;gap:12px;margin:0 20px 20px;}
+.stat-pill{flex:1;background:linear-gradient(135deg,#1e1710,#181210);border:1px solid #c9a96e1a;border-radius:14px;padding:16px 10px;text-align:center;position:relative;overflow:hidden;}
+.stat-pill::before{content:’’;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#c9a96e07,transparent 70%);pointer-events:none;}
+.stat-icon{font-size:20px;display:block;margin-bottom:5px;}
+.stat-val{font-family:‘IM Fell English’,serif;font-size:26px;color:#c9a96e;display:block;line-height:1;}
+.stat-val.anim{animation:statPop 0.45s cubic-bezier(0.4,0,0.2,1);}
+@keyframes statPop{0%{transform:scale(1);}40%{transform:scale(1.25);color:#f0e0c0;}100%{transform:scale(1);}}
+.stat-lbl{font-size:10px;color:#c9a96e44;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;display:block;}
+
+/* LEVEL HERO */
+.level-hero{margin:0 20px 8px;background:linear-gradient(135deg,#231b12,#1a1309);border:1px solid #c9a96e2a;border-radius:16px;padding:20px 20px 18px;position:relative;overflow:hidden;}
+.level-hero::after{content:’’;position:absolute;bottom:-30px;right:-30px;width:140px;height:140px;background:radial-gradient(circle,#c9a96e0c,transparent 70%);pointer-events:none;}
+.level-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.level-icon-name{display:flex;align-items:center;gap:12px;}
+.level-orb{width:44px;height:44px;border-radius:50%;border:1px solid #c9a96e33;display:flex;align-items:center;justify-content:center;font-size:22px;background:radial-gradient(circle,#c9a96e0e,transparent);flex-shrink:0;}
+.level-name{font-family:‘IM Fell English’,serif;font-size:20px;color:#f0e0c0;line-height:1.2;}
+.level-sub{font-size:12px;color:#c9a96e55;margin-top:3px;letter-spacing:0.04em;}
+.level-count{text-align:right;}
+.level-fraction{font-family:‘IM Fell English’,serif;font-size:24px;color:#c9a96e;line-height:1;}
+.level-fraction span{font-size:14px;color:#c9a96e55;}
+
+/* PROGRESS BAR */
+.progress-wrap{margin-top:14px;}
+.progress-label{display:flex;justify-content:space-between;margin-bottom:6px;}
+.progress-label-l{font-size:11px;color:#c9a96e44;letter-spacing:0.08em;}
+.progress-label-r{font-size:11px;color:#c9a96e66;}
+.progress-track{height:6px;background:#c9a96e0e;border-radius:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6a4a1a,#c9a96e,#f0d080);border-radius:10px;transition:width 0.9s cubic-bezier(0.4,0,0.2,1);position:relative;min-width:0;}
+.progress-fill::after{content:’’;position:absolute;right:-1px;top:0;bottom:0;width:8px;background:radial-gradient(circle,#fff9,transparent);border-radius:50%;transition:right 0.9s cubic-bezier(0.4,0,0.2,1);}
+
+/* LEVEL TABS */
+.level-tabs{display:flex;margin:12px 20px 0;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.level-tabs::-webkit-scrollbar{display:none;}
+.lvl-tab{flex-shrink:0;padding:8px 15px;border-radius:24px;font-family:‘IM Fell English’,serif;font-size:13px;cursor:pointer;transition:all 0.25s;color:#c9a96e2a;border:1px solid #c9a96e0f;background:transparent;white-space:nowrap;position:relative;}
+.lvl-tab.active{background:linear-gradient(135deg,#2a1f14,#1e1710);color:#c9a96e;border-color:#c9a96e44;box-shadow:0 0 14px #c9a96e12;}
+.lvl-tab.complete::after{content:‘✦’;font-size:8px;position:absolute;top:2px;right:4px;color:#c9a96e77;}
+.lvl-tab.locked{color:#c9a96e15;border-color:#c9a96e08;cursor:default;}
+
+/* SUBTABS */
+.subtabs{display:flex;margin:12px 20px 0;gap:2px;background:#0c0908;border-radius:10px;padding:3px;}
+.subtab{flex:1;padding:9px 4px;text-align:center;border-radius:8px;font-family:‘IM Fell English’,serif;font-size:13px;cursor:pointer;transition:all 0.2s;color:#c9a96e33;border:none;background:transparent;}
+.subtab.active{background:linear-gradient(135deg,#231b12,#1a1309);color:#c9a96e;box-shadow:0 1px 8px #0005;}
+
+/* LOCKED */
+.locked-screen{text-align:center;padding:60px 32px;line-height:1.9;}
+.locked-glyph{font-size:44px;display:block;margin-bottom:16px;opacity:0.12;}
+.locked-title{font-family:‘IM Fell English’,serif;font-size:18px;color:#c9a96e33;margin-bottom:6px;}
+.locked-sub{font-size:14px;color:#c9a96e22;font-style:italic;}
+
+/* LIST */
+.list{padding:14px 20px 20px;display:flex;flex-direction:column;gap:10px;}
+
+/* CARD */
+.card{border-radius:14px;padding:16px 16px 14px;cursor:pointer;transition:transform 0.2s,opacity 0.2s;position:relative;overflow:hidden;border:1px solid transparent;background:linear-gradient(145deg,#1e1611,#171210);}
+.card:active{transform:scale(0.982);}
+.card.done{opacity:0.42;}
+.card[data-cat=“obecność”]   {border-color:#9b8ea81a;}
+.card[data-cat=“komunikacja”]{border-color:#7a9e9f1a;}
+.card[data-cat=“bliskość”]   {border-color:#c4956a1a;}
+.card[data-cat=“granice”]    {border-color:#a078781a;}
+.card[data-cat=“refleksja”]  {border-color:#8a9e7a1a;}
+.card-shimmer{position:absolute;top:0;left:0;right:0;height:1px;}
+.card[data-cat=“obecność”]    .card-shimmer{background:linear-gradient(90deg,transparent,#9b8ea844,transparent);}
+.card[data-cat=“komunikacja”] .card-shimmer{background:linear-gradient(90deg,transparent,#7a9e9f44,transparent);}
+.card[data-cat=“bliskość”]    .card-shimmer{background:linear-gradient(90deg,transparent,#c4956a44,transparent);}
+.card[data-cat=“granice”]     .card-shimmer{background:linear-gradient(90deg,transparent,#a0787844,transparent);}
+.card[data-cat=“refleksja”]   .card-shimmer{background:linear-gradient(90deg,transparent,#8a9e7a44,transparent);}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.card-title{font-family:‘IM Fell English’,serif;font-size:16px;color:#f0e0c0;line-height:1.35;flex:1;}
+.card-check{width:22px;height:22px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:2px;transition:all 0.3s;}
+.card-footer{display:flex;align-items:center;gap:8px;}
+.cat-tag{font-size:9px;letter-spacing:0.12em;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+.card-reflection{font-size:12px;color:#c9a96e44;margin-top:10px;font-style:italic;line-height:1.6;border-top:1px solid #c9a96e0a;padding-top:10px;white-space:pre-wrap;word-break:break-word;}
+
+.empty{text-align:center;padding:52px 24px;color:#c9a96e22;font-family:‘IM Fell English’,serif;font-size:15px;font-style:italic;line-height:1.9;}
+.empty-glyph{font-size:34px;display:block;margin-bottom:12px;opacity:0.25;}
+
+/* OVERLAY + MODAL */
+.overlay{position:fixed;inset:0;background:#07050399;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:100;display:flex;align-items:flex-end;}
+.overlay.hidden{display:none;}
+.modal{background:linear-gradient(180deg,#241c11 0%,#160e07 100%);border:1px solid #c9a96e2a;border-top-color:#c9a96e44;border-radius:24px 24px 0 0;padding:28px 24px 56px;width:100%;max-height:92vh;overflow-y:auto;animation:slideUp 0.3s cubic-bezier(0.33,1,0.68,1);}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-handle{width:40px;height:3px;background:#c9a96e1a;border-radius:2px;margin:0 auto 24px;}
+.modal-cat-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.modal-cat-dot{width:6px;height:6px;border-radius:50%;}
+.modal-cat-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;}
+.modal-title{font-family:‘IM Fell English’,serif;font-size:24px;color:#f0e0c0;margin-bottom:14px;line-height:1.25;}
+.modal-desc{font-size:15px;color:#c9a96e77;line-height:1.8;margin-bottom:22px;font-style:italic;padding:14px 16px;background:#c9a96e04;border-left:2px solid #c9a96e2a;border-radius:0 8px 8px 0;}
+.modal-level{font-size:12px;color:#c9a96e33;letter-spacing:0.08em;margin-bottom:22px;}
+.field-label{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#c9a96e44;margin-bottom:8px;}
+textarea{width:100%;background:#0c0908;border:1px solid #c9a96e1a;border-radius:10px;padding:14px;color:#f0e0c0;font-family:‘Cormorant Garamond’,serif;font-size:16px;line-height:1.65;resize:none;min-height:110px;outline:none;transition:border-color 0.25s,box-shadow 0.25s;-webkit-appearance:none;}
+textarea:focus{border-color:#c9a96e44;box-shadow:0 0 0 3px #c9a96e08;}
+textarea::placeholder{color:#c9a96e18;font-style:italic;}
+.btn{width:100%;margin-top:10px;padding:15px;border-radius:12px;font-family:‘IM Fell English’,serif;font-size:16px;letter-spacing:0.06em;cursor:pointer;transition:all 0.22s;border:none;-webkit-appearance:none;}
+.btn-save{background:transparent;border:1px solid #c9a96e22 !important;color:#c9a96e44;font-size:14px;}
+.btn-save:active{background:#c9a96e07;}
+.btn-ready{background:linear-gradient(135deg,#9a7228,#c9a96e,#d4b87a);color:#0e0b07;font-weight:600;box-shadow:0 4px 20px #c9a96e1a;}
+.btn-ready:active{opacity:0.88;box-shadow:none;}
+.btn-done{background:#c9a96e0a;color:#c9a96e33;}
+.modal-divider{height:1px;background:linear-gradient(90deg,transparent,#c9a96e12,transparent);margin:12px 0;}
+
+/* CELEBRATE */
+.celebrate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:#07050399;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+.celebrate.hidden{display:none;}
+.celebrate-card{background:linear-gradient(160deg,#2c2012,#180f07);border:1px solid #c9a96e44;border-radius:24px;padding:40px 32px;text-align:center;max-width:320px;width:90%;position:relative;overflow:hidden;animation:celebIn 0.5s cubic-bezier(0.33,1,0.68,1);}
+@keyframes celebIn{from{transform:scale(0.85) translateY(16px);opacity:0;}to{transform:scale(1);opacity:1;}}
+.celebrate-card::before{content:’’;position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:220px;height:220px;background:radial-gradient(circle,#c9a96e14,transparent 70%);pointer-events:none;}
+.celebrate-icon{font-size:54px;display:block;margin-bottom:16px;animation:iconIn 0.5s ease 0.1s both;}
+@keyframes iconIn{from{transform:scale(0.5) rotate(-15deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+.celebrate-title{font-family:‘IM Fell English’,serif;font-size:28px;color:#f0e0c0;margin-bottom:8px;}
+.celebrate-sub{font-size:15px;color:#c9a96e77;font-style:italic;line-height:1.65;margin-bottom:28px;}
+.celebrate-btn{background:linear-gradient(135deg,#c9a96e,#d4b87a);color:#0e0b07;font-family:‘IM Fell English’,serif;font-size:16px;padding:14px 32px;border:none;border-radius:12px;cursor:pointer;width:100%;letter-spacing:0.05em;}
+.particle{position:absolute;border-radius:50%;animation:pFly var(–pd) ease-out var(–pde) both;}
+@keyframes pFly{from{transform:translate(0,0) scale(1);opacity:0.9;}to{transform:translate(var(–px),var(–py)) scale(0);opacity:0;}}
+
+/* TOAST */
+.toast{position:fixed;bottom:36px;left:50%;transform:translateX(-50%) translateY(14px);background:linear-gradient(135deg,#231b11,#1a1309);border:1px solid #c9a96e3a;border-radius:24px;padding:10px 22px;font-family:‘IM Fell English’,serif;font-size:14px;color:#c9a96e;opacity:0;transition:all 0.35s cubic-bezier(0.33,1,0.68,1);z-index:300;white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px #00000055;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+<div class="app">
+  <div class="header">
+    <span class="header-moon">☽</span>
+    <div class="header-sup">journey do siebie</div>
+    <div class="header-name">Bliżej siebie</div>
+    <div class="header-tagline">co robię ja, zmienia nas</div>
+  </div>
+
+  <!-- 2 stats: streak + total done -->
+
+  <div class="stats-row">
+    <div class="stat-pill">
+      <span class="stat-icon">🔥</span>
+      <span class="stat-val" id="statStreak">0</span>
+      <span class="stat-lbl">dni z rzędu</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-icon">◉</span>
+      <span class="stat-val" id="statDone">0</span>
+      <span class="stat-lbl">ukończone</span>
+    </div>
+  </div>
+
+  <!-- Level hero with progress bar -->
+
+  <div class="level-hero">
+    <div class="level-top">
+      <div class="level-icon-name">
+        <div class="level-orb" id="levelOrb">◌</div>
+        <div>
+          <div class="level-name" id="levelName">Obserwatorka</div>
+          <div class="level-sub" id="levelSub">Poziom 1</div>
+        </div>
+      </div>
+      <div class="level-count">
+        <div class="level-fraction"><span id="fracDone">0</span><span> / 30</span></div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span class="progress-label-l">postęp</span>
+        <span class="progress-label-r" id="progPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="level-tabs" id="levelTabs"></div>
+
+  <div class="subtabs">
+    <button class="subtab active" onclick="setSubtab('todo')" id="subtab-todo">Do zrobienia</button>
+    <button class="subtab" onclick="setSubtab('done')" id="subtab-done">Zrobione</button>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<!-- TASK MODAL -->
+
+<div class="overlay hidden" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-cat-row">
+      <div class="modal-cat-dot" id="mCatDot"></div>
+      <div class="modal-cat-label" id="mCatLabel"></div>
+    </div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-desc" id="mDesc"></div>
+    <div class="modal-level" id="mLevel"></div>
+    <div class="field-label">Twoja refleksja</div>
+    <textarea id="reflectionInput" rows="4" placeholder="Co poczułaś? Co zauważyłaś? Co chcesz zapamiętać..."></textarea>
+    <button class="btn btn-save" onclick="saveReflection()">↳ Zapisz refleksję</button>
+    <div class="modal-divider"></div>
+    <button class="btn" id="btnComplete" onclick="handleComplete()"></button>
+  </div>
+</div>
+
+<!-- CELEBRATE -->
+
+<div class="celebrate hidden" id="celebrate">
+  <div class="celebrate-card">
+    <div id="particles"></div>
+    <span class="celebrate-icon" id="celebIcon">✦</span>
+    <div class="celebrate-title" id="celebTitle"></div>
+    <div class="celebrate-sub" id="celebSub"></div>
+    <button class="celebrate-btn" onclick="closeCelebrate()">Kontynuuj ✦</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LM=[
+  {name:"Obserwatorka",icon:"◌"},
+  {name:"Obecna",      icon:"◎"},
+  {name:"Słuchaczka",  icon:"◉"},
+  {name:"Partnerka",   icon:"✦"},
+  {name:"Bliska",      icon:"❋"},
+];
+const CATS={
+  "obecność":   {color:"#9b8ea8",label:"Obecność"},
+  "komunikacja":{color:"#7a9e9f",label:"Komunikacja"},
+  "bliskość":   {color:"#c4956a",label:"Bliskość"},
+  "granice":    {color:"#a07878",label:"Granice"},
+  "refleksja":  {color:"#8a9e7a",label:"Refleksja"},
+};
+const C=[
+// ── LEVEL 1 — light → warm → first courage ──
+// 1. Poranny kontakt — easiest possible, just a moment
+// 2. Zauważ go dziś — observing, no action required
+// 3. Jak trafiam do związku — first private reflection, sets the tone
+// 4. Jeden posiłek razem — simple shared act
+// 5. Pytanie i cisza — first real communication, gentle
+// 6. Uśmiech do niego — tiny warmth gesture
+// 7. Za co jestem wdzięczna — gratitude, positive and safe
+// 8. Trzy oddechy przed rozmową — body-based, easy
+// 9. Co lubię w nim — warmth focused inward→outward
+// 10. Powiedz dziękuję — first verbal act
+// 11. Co mi daje ta relacja — reflection, positive
+// 12. Wieczór bez ekranu — requires intention, bigger commitment
+// 13. Słucham bez rady — active listening, harder
+// 14. Gest obecności — physical touch, conscious act
+// 15. Moje tempo — first gentle self-assertion
+// 16. Pięć minut bez agendy — sitting with discomfort of stillness
+// 17. Co u niego słychać — curiosity about him
+// 18. Wspomnienie razem — emotional warmth, opens heart
+// 19. Moja granica dziś — first boundary, private/written only
+// 20. Nie przerywam — self-control, harder
+// 21. Co jest moje — clarity on what belongs to you
+// 22. Zrób coś dla niego — active care gesture
+// 23. Kiedy mówię tak, a nie chcę — honest self-look
+// 24. Jedno zdanie o mnie — first real self-disclosure
+// 25. Mój wzorzec — deeper self-reflection
+// 26. Poranny kontakt... (list, którego nie wyślę)
+// 27. Potrzeba bez przepraszania — first real boundary act
+// 28. Co chcę zmienić — accountability
+// 29. Odmowa bez winy — courage required
+// 30. Jaka jestem partnerką — closing reflection, honest self-portrait
+{id:106,lv:1,cat:"obecność",   o:1, t:"Poranny kontakt",               d:"Zacznij dzień od krótkiego, świadomego momentu z nim – zanim sięgniesz po telefon. Może to być tylko spojrzenie albo chwila ciszy obok siebie."},
+{id:104,lv:1,cat:"obecność",   o:2, t:"Zauważ go dziś",                d:"Przez cały dzień zwracaj uwagę na to, co robi. Jeden gest, jedno słowo, jedna decyzja. Wieczorem przypomnij sobie, co zauważyłaś."},
+{id:141,lv:1,cat:"refleksja",  o:3, t:"Jak trafiam do związku",        d:"Opisz, w jakim stanie emocjonalnym najczęściej wchodzisz w interakcję z partnerem – zmęczona, rozkojarzona, obecna? Co Ty wnosisz do tej przestrzeni?"},
+{id:103,lv:1,cat:"obecność",   o:4, t:"Jeden posiłek razem",           d:"Zjedz z nim jeden posiłek bez telefonu, telewizji i innych ekranów. Tylko jedzenie, Wy dwoje i to, co jest między Wami."},
+{id:111,lv:1,cat:"komunikacja",o:5, t:"Pytanie i cisza",                d:"Zadaj mu jedno pytanie – o cokolwiek. A potem tylko słuchaj. Nie komentuj, nie doradzaj, nie uzupełniaj. Zauważ, jak trudno jest po prostu być przy czyjejś odpowiedzi."},
+{id:124,lv:1,cat:"bliskość",   o:6, t:"Uśmiech do niego",              d:"Uśmiechnij się do niego dziś – nie automatycznie, ale świadomie. Raz, kiedy go zobaczysz. Zauważ, co się w Tobie dzieje w tej chwili."},
+{id:144,lv:1,cat:"refleksja",  o:7, t:"Za co jestem wdzięczna",        d:"Zapisz trzy rzeczy, za które jesteś wdzięczna w tej relacji – nie wielkie, ale prawdziwe. Pozwól sobie to poczuć, nie tylko zapisać."},
+{id:102,lv:1,cat:"obecność",   o:8, t:"Trzy oddechy przed rozmową",   d:"Zanim zaczniesz kolejną rozmowę z partnerem, zrób trzy głębokie oddechy. Pozwól sobie być tu, zanim cokolwiek powiesz."},
+{id:122,lv:1,cat:"bliskość",   o:9, t:"Co lubię w nim",                d:"Zapisz trzy rzeczy, które lubisz w partnerze. Nie wielkie, nie idealne – po prostu prawdziwe. Zostaw to dla siebie lub powiedz mu o jednej z nich."},
+{id:112,lv:1,cat:"komunikacja",o:10,t:"Powiedz dziękuję",               d:"Podziękuj mu dziś za coś konkretnego – nie ogólnie, ale za jeden szczegółowy gest, słowo lub działanie. Powiedz to głośno."},
+{id:145,lv:1,cat:"refleksja",  o:11,t:"Co mi daje ta relacja",         d:"Zastanów się, co ta relacja wnosi do Twojego życia. Co masz dzięki niej? Nie co powinna wnosić – co faktycznie wnosi."},
+{id:101,lv:1,cat:"obecność",   o:12,t:"Wieczór bez ekranu",            d:"Dziś wieczorem odłóż telefon i bądź po prostu obecna – przy nim, przy sobie. Nie musisz nic robić ani organizować. Obserwuj, co czujesz, gdy nie ma między Wami ekranu."},
+{id:113,lv:1,cat:"komunikacja",o:13,t:"Słucham bez rady",               d:"Gdy dziś będzie mówił o czymś trudnym lub ważnym, powstrzymaj się od dawania rad. Tylko słuchaj i potwierdź, że słyszysz."},
+{id:121,lv:1,cat:"bliskość",   o:14,t:"Gest obecności",                d:"Dotknij go dziś raz – świadomie, nieprzypadkowo. Ręka na ramieniu, dłoń na plecach, cokolwiek, co powie: widzę cię. Nie czekaj na odpowiedni moment, stwórz go."},
+{id:136,lv:1,cat:"granice",    o:15,t:"Moje tempo",                    d:"Zrób dziś jedną rzecz we własnym tempie, bez dopasowywania się do jego rytmu. Zauważ, jak to wpływa na Twoje samopoczucie."},
+{id:105,lv:1,cat:"obecność",   o:16,t:"Pięć minut bez agendy",         d:"Usiądź obok niego przez pięć minut bez żadnego planu. Nie rozmawiaj o logistyce, nie planuj. Tylko bądź."},
+{id:114,lv:1,cat:"komunikacja",o:17,t:"Co u niego słychać",             d:"Zapytaj go dziś jak się czuje – i naprawdę poczekaj na odpowiedź. Nie jako formułka, ale jako prawdziwe zainteresowanie."},
+{id:123,lv:1,cat:"bliskość",   o:18,t:"Wspomnienie razem",             d:"Przypomnij sobie jedno wspólne wspomnienie, które sprawia, że czujesz się dobrze. Opowiedz mu o nim albo po prostu powróć do niego sama."},
+{id:131,lv:1,cat:"granice",    o:19,t:"Moja granica dziś",             d:"Zapisz jedną granicę, której potrzebujesz w tej relacji. Tylko dla siebie, tylko na papierze. Samo jej nazwanie jest już działaniem."},
+{id:116,lv:1,cat:"komunikacja",o:20,t:"Nie przerywam",                  d:"Przez cały dzień pilnuj jednego: nie przerywaj mu w połowie zdania. Obserwuj, kiedy masz na to ochotę i co się wtedy w Tobie dzieje."},
+{id:134,lv:1,cat:"granice",    o:21,t:"Co jest moje",                  d:"Napisz trzy rzeczy, które są tylko Twoje w tym związku – przestrzeń, czas, rytuał. Rzeczy, których nie chcesz się wyrzekać."},
+{id:125,lv:1,cat:"bliskość",   o:22,t:"Zrób coś dla niego",            d:"Zrób dziś jedną małą rzecz dla niego – bez pytania, czy tego chce. Nie wielką, nie wymagającą. Coś, co powie: myślałam o tobie."},
+{id:132,lv:1,cat:"granice",    o:23,t:"Kiedy mówię tak, a nie chcę",   d:"Przypomnij sobie sytuację, gdy powiedziałaś tak, a chciałaś powiedzieć nie. Co wtedy czułaś? Co Cię powstrzymało? Zapisz to."},
+{id:115,lv:1,cat:"komunikacja",o:24,t:"Jedno zdanie o mnie",            d:"Powiedz mu dziś jedno zdanie o sobie – o tym, jak się czujesz, co przeżyłaś, co jest w Tobie. Nie pytanie, tylko zdanie. Pierwszy krok do bycia widzianą."},
+{id:143,lv:1,cat:"refleksja",  o:25,t:"Mój wzorzec",                   d:"Czy widzisz jakiś wzorzec w swoich reakcjach na partnera? Coś, co powtarza się w trudnych momentach? Opisz go bez oceniania siebie."},
+{id:126,lv:1,cat:"bliskość",   o:26,t:"List, którego nie wyślę",       d:"Napisz mu krótki list – kilka zdań o tym, co w nim cenisz. Nie musisz go wysyłać. Samo pisanie jest już aktem bliskości."},
+{id:133,lv:1,cat:"granice",    o:27,t:"Potrzeba bez przepraszania",    d:"Wyraź dziś jedną potrzebę – bez słowa 'przepraszam' przed nią. Tylko: potrzebuję, chcę, zależy mi. Prosto i bez tłumaczenia."},
+{id:142,lv:1,cat:"refleksja",  o:28,t:"Co chcę zmienić",               d:"Napisz jedną rzecz w swoim zachowaniu w tej relacji, którą chciałabyś zmienić. Nie jego zachowanie – Twoje. Jeden konkretny nawyk lub reakcja."},
+{id:135,lv:1,cat:"granice",    o:29,t:"Odmowa bez winy",               d:"Odmów dziś czegoś małego, na co nie masz ochoty. Bez długich wyjaśnień. Zauważ, czy pojawia się poczucie winy – i skąd pochodzi."},
+{id:146,lv:1,cat:"refleksja",  o:30,t:"Jaka jestem partnerką",         d:"Opisz siebie jako partnerkę z zewnątrz – jakbyś patrzyła na siebie oczami kogoś życzliwego. Co widzisz? Co Ci się podoba, a co chciałabyś rozwinąć?"},
+{id:204,lv:2,cat:"obecność",   o:1, t:"Wyłącz powiadomienia",          d:"Na trzy godziny wyłącz powiadomienia w telefonie, gdy jesteś z nim. Sprawdź, jak zmienia się jakość Twojej obecności."},
+{id:205,lv:2,cat:"obecność",   o:2, t:"Zauważ zmianę w nim",           d:"Przez tydzień codziennie zauważaj jedną rzecz, która się zmieniła lub jest nowa w partnerze. Obserwuj, jak dobrze go znasz."},
+{id:242,lv:2,cat:"refleksja",  o:3, t:"Kiedy jestem najlepsza",        d:"Opisz, kiedy jesteś najlepszą wersją siebie w tej relacji. Co temu sprzyja? Jakie warunki, jakie okoliczności, jakie Twoje nastawienie?"},
+{id:206,lv:2,cat:"obecność",   o:4, t:"Wspólna aktywność",             d:"Zaproponuj mu jedną wspólną aktywność fizyczną – spacer, gotowanie, cokolwiek. Skup się na byciu razem, nie na samej czynności."},
+{id:214,lv:2,cat:"komunikacja",o:5, t:"Zapytaj o jego dzień naprawdę", d:"Zapytaj go o dzień i zadaj co najmniej dwa pytania pogłębiające. Nie tylko: i co? Ale: co to dla ciebie znaczyło? Jak się czułeś?"},
+{id:225,lv:2,cat:"bliskość",   o:6, t:"Zapamiętaj szczegół",           d:"Zapamiętaj jeden szczegół z tego, co powie dziś partner – i wróć do niego następnego dnia. Pamiętasz, jak mówiłeś wczoraj o...?"},
+{id:246,lv:2,cat:"refleksja",  o:7, t:"Moje zasoby",                   d:"Napisz trzy wewnętrzne zasoby, które wnosisz do tej relacji – cechy, umiejętności, wartości. Co jest w Tobie, co tej relacji służy?"},
+{id:202,lv:2,cat:"obecność",   o:8, t:"Obserwacja bez oceny",          d:"Przez jeden dzień obserwuj partnera bez oceniania tego, co robi. Gdy pojawi się ocena – zauważ ją i puść. Tylko obserwuj."},
+{id:213,lv:2,cat:"komunikacja",o:9, t:"Nie kończę jego zdań",          d:"Przez cały dzień nie kończ za niego zdań, nie przewiduj, co powie. Daj mu dojść do końca myśli samemu."},
+{id:222,lv:2,cat:"bliskość",   o:10,t:"Dotknij go inaczej",            d:"Dziś dotknij go w sposób, który nie jest automatyczny ani nawykowy. Świadomie, z intencją. Zauważ, jak reagujesz Ty, a jak on."},
+{id:234,lv:2,cat:"granice",    o:11,t:"Co mnie męczy",                 d:"Napisz jedną rzecz w relacji, która Cię męczy lub przytłacza. Nie szukaj rozwiązania – tylko ją nazwij. Samo nazwanie zmienia perspektywę."},
+{id:203,lv:2,cat:"obecność",   o:12,t:"Wróć do rozmowy",               d:"Wróć do rozmowy, którą przerwałaś lub zakończyłaś zbyt szybko. Zapytaj: pamiętasz, jak mówiłeś o...? Chcę wiedzieć więcej."},
+{id:212,lv:2,cat:"komunikacja",o:13,t:"Czuję, nie myślę",              d:"W następnej ważniejszej rozmowie zamiast: 'myślę, że...' powiedz: 'czuję, że...'. Ćwicz rozróżnienie między myślą a uczuciem."},
+{id:224,lv:2,cat:"bliskość",   o:14,t:"Wspólne milczenie",             d:"Pobądźcie razem w ciszy przez 20 minut – czytając, siedząc obok. Bez potrzeby wypełniania przestrzeni słowami."},
+{id:241,lv:2,cat:"refleksja",  o:15,t:"Skąd biorę wzorce",            d:"Zastanów się, jakie wzorce relacji wyniosłaś z domu rodzinnego. Co powtarzasz? Co robisz inaczej? Które z nich służą tej relacji?"},
+{id:201,lv:2,cat:"obecność",   o:16,t:"Cały wieczór razem",            d:"Zaplanuj wieczór tylko dla Was dwojga – bez specjalnej agendy. Po prostu bądź z nim przez kilka godzin z pełną uwagą."},
+{id:211,lv:2,cat:"komunikacja",o:17,t:"Pytanie, którego nie zadałam",   d:"Jest coś, o co nigdy go nie zapytałaś – o marzenie, o strach, o wspomnienie. Zadaj to pytanie dziś. Nie musisz tłumaczyć dlaczego pytasz."},
+{id:223,lv:2,cat:"bliskość",   o:18,t:"Powiedz co go lubisz",          d:"Powiedz mu wprost jedną rzecz, którą w nim lubisz. Nie komplement o wyglądzie – coś głębszego. Jak reaguje na trudne sytuacje, jak myśli, jak się śmieje."},
+{id:243,lv:2,cat:"refleksja",  o:19,t:"Co mnie oddala",                d:"Co sprawia, że czujesz się dalej od partnera? Nie co on robi – ale co się dzieje w Tobie, co Cię zamyka lub oddala?"},
+{id:231,lv:2,cat:"granice",    o:20,t:"Prośba wprost",                 d:"Poproś go o coś, czego potrzebujesz – konkretnie, bez owijania w bawełnę, bez przepraszania za tę potrzebę. To ćwiczenie dla Ciebie, nie dla niego."},
+{id:216,lv:2,cat:"komunikacja",o:21,t:"Powtórz, co usłyszałam",        d:"Po ważnej rozmowie powtórz mu własnymi słowami to, co powiedział. Sprawdź, czy dobrze go zrozumiałaś. Słyszałam, że..."},
+{id:226,lv:2,cat:"bliskość",   o:22,t:"Mój rytuał dla nas",            d:"Wymyśl jeden mały rytuał, który chciałabyś wprowadzić – poranną kawę razem, wieczorne pytanie. Zaproponuj go mu. Powtórz trzy razy."},
+{id:235,lv:2,cat:"granice",    o:23,t:"Moja odpowiedź, nie jego oczekiwanie",d:"W jednej sytuacji dziś odpowiedz zgodnie z tym, czego Ty chcesz – nie z tym, czego on oczekuje. Zauważ różnicę w tym, jak się czujesz."},
+{id:215,lv:2,cat:"komunikacja",o:24,t:"Powiedz o trudnej emocji",      d:"Powiedz mu o jednej trudnej emocji, którą ostatnio przeżyłaś – nie jako zarzut, ale jako informację o sobie. Czułam się..."},
+{id:245,lv:2,cat:"refleksja",  o:25,t:"Co bym zrobiła inaczej",        d:"Przypomnij sobie jedną sytuację z ostatnich tygodni, którą chciałabyś rozegrać inaczej. Co byś zmieniła? Co Cię wtedy zatrzymało?"},
+{id:221,lv:2,cat:"bliskość",   o:26,t:"List do niego",                 d:"Napisz mu list – o tym, co w nim cenisz, co dostrzegasz, za co jesteś wdzięczna. Możesz go zachować tylko dla siebie. Samo pisanie otworzy coś w Tobie."},
+{id:232,lv:2,cat:"granice",    o:27,t:"Nie wyjaśniam za dużo",         d:"Gdy powiesz nie lub wyrazisz potrzebę, ogranicz wyjaśnienie do jednego zdania. Obserwuj, czy czujesz potrzebę tłumaczenia się i skąd ona pochodzi."},
+{id:244,lv:2,cat:"refleksja",  o:28,t:"Mój strach w relacji",          d:"Napisz o jednym strachu, który pojawia się w tej relacji. Może strach przed odrzuceniem, zranieniem, utratą. Przyznaj się do niego sobie."},
+{id:233,lv:2,cat:"granice",    o:29,t:"Czas tylko dla mnie",           d:"Zarezerwuj sobie dziś godzinę tylko dla siebie i powiedz mu o tym wprost: potrzebuję teraz czasu dla siebie. Bez długich wyjaśnień."},
+{id:236,lv:2,cat:"granice",    o:30,t:"Granica w rozmowie",            d:"Gdy rozmowa zejdzie w miejsce, które jest dla Ciebie niekomfortowe, powiedz to: nie chcę teraz rozmawiać o tym. Spokojnie, bez dramatu."},
+{id:305,lv:3,cat:"obecność",   o:1, t:"Rano świadomie",                d:"Przez tydzień zaczynaj każdy dzień od krótkiego, świadomego momentu z partnerem – zanim zaczniecie dzień. Może to być tylko jedno zdanie lub spojrzenie."},
+{id:303,lv:3,cat:"obecność",   o:2, t:"Bądź ciekawa, nie pewna",       d:"Przez jeden dzień podejdź do partnera z ciekawością, jakbyś go spotykała pierwszy raz. Zawieś to, co o nim wiesz. Co odkryjesz?"},
+{id:342,lv:3,cat:"refleksja",  o:3, t:"Co zmieniło się we mnie",       d:"Jak zmieniłaś się jako osoba przez czas trwania tej relacji? Co wniosła do Twojego życia? Czego Cię nauczyła o sobie?"},
+{id:306,lv:3,cat:"obecność",   o:4, t:"Widzę cię dziś",                d:"Powiedz mu dziś coś, co zauważyłaś – nie komplement, ale obserwację. Dziś widziałam, że... Daj mu poczuć, że jest widziany."},
+{id:313,lv:3,cat:"komunikacja",o:5, t:"Zapytaj o jego potrzebę",       d:"Zapytaj partnera, czego teraz potrzebuje – i wysłuchaj bez planowania riposty. Czego teraz najbardziej potrzebujesz ode mnie?"},
+{id:325,lv:3,cat:"bliskość",   o:6, t:"Tydzień małych gestów",         d:"Przez siedem dni rób jeden mały, świadomy gest bliskości każdego dnia. Nie wielkie gesty – małe, regularne, intencjonalne."},
+{id:345,lv:3,cat:"refleksja",  o:7, t:"Miłość jako wybór",             d:"Napisz o tym, co znaczy dla Ciebie miłość jako codzienny wybór – nie uczucie, ale działanie. Co wybierasz każdego dnia w tej relacji?"},
+{id:301,lv:3,cat:"obecność",   o:8, t:"Dzień pełnej uważności",        d:"Przez cały dzień traktuj każdą interakcję z partnerem jako pełnowartościową chwilę. Gdy do Ciebie mówi – odłóż to, co robisz, i naprawdę bądź."},
+{id:316,lv:3,cat:"komunikacja",o:9, t:"Nie rozwiązuję, towarzyszę",   d:"Gdy będzie mówił o problemie, zapytaj: chcesz żebym słuchała, czy szukasz pomysłu? A potem rób to, czego potrzebuje."},
+{id:326,lv:3,cat:"bliskość",   o:10,t:"Przyjmij jego gest",            d:"Gdy on zrobi coś dla Ciebie – przyjmij to. Nie minimalizuj, nie odwracaj uwagi. Powiedz: dziękuję, to mi dużo znaczy. Pozwól sobie być odbiorcą."},
+{id:335,lv:3,cat:"granice",    o:11,t:"Moje nie to też miłość",        d:"Przypomnij sobie, że odmowa może być wyrazem miłości – do siebie i do niego. Gdy dbasz o siebie, masz więcej do dania. Napisz o tym."},
+{id:302,lv:3,cat:"obecność",   o:12,t:"Tydzień bez narzekania",        d:"Przez siedem dni nie narzekaj na niego – ani do niego, ani do innych. Gdy pojawi się impuls, zauważ go i zapytaj siebie: co ta myśl o mnie mówi?"},
+{id:315,lv:3,cat:"komunikacja",o:13,t:"Mów o tym, co ważne",           d:"Powiedz mu o czymś, co jest dla Ciebie ważne i czego jeszcze nie powiedziałaś – wartość, marzenie, obawa. Coś, co jest prawdziwe i Twoje."},
+{id:324,lv:3,cat:"bliskość",   o:14,t:"Zaproś go do swojego świata",   d:"Podziel się z nim czymś, co lubisz i co jest ważną częścią Ciebie – muzyka, książka, miejsce, wspomnienie. Nie oczekuj, że poczuje to samo."},
+{id:343,lv:3,cat:"refleksja",  o:15,t:"Moje oczekiwania",              d:"Napisz o oczekiwaniach, które masz wobec partnera. Które z nich są uzasadnione i wyrażone? Które są nieświadome i nigdy nienazwane?"},
+{id:304,lv:3,cat:"obecność",   o:16,t:"Obecna w konflikcie",           d:"Gdy pojawi się napięcie, zamiast uciekać lub atakować – zostań. Weź oddech i pozostań w kontakcie z tym, co czujesz. Nie musisz nic rozwiązywać."},
+{id:312,lv:3,cat:"komunikacja",o:17,t:"Jedna potrzeba, moje słowa",    d:"Powiedz mu o jednej swojej potrzebie używając tylko pierwszej osoby. Nie 'ty nigdy', ale 'ja potrzebuję'. Znajdź jedno zdanie, które jest prawdziwe i łagodne."},
+{id:322,lv:3,cat:"bliskość",   o:18,t:"Zapytaj o jego świat wewnętrzny",d:"Zapytaj go o coś, co go porusza wewnętrznie – o co się boi, o czym marzy, za czym tęskni. Jedno głębokie pytanie i pełna obecność przy odpowiedzi."},
+{id:344,lv:3,cat:"refleksja",  o:19,t:"Kiedy się zamykam",             d:"Co powoduje, że się zamykasz w tej relacji? Jaki gest, słowo, sytuacja? Co się wtedy dzieje w Tobie i co robisz z tą zamkniętością?"},
+{id:332,lv:3,cat:"granice",    o:20,t:"Moje potrzeby są ważne",        d:"Zrób dziś coś, czego potrzebujesz, nawet jeśli nie jest wygodne dla niego. Bez przeprosin, bez poczucia winy. Twoje potrzeby są równie ważne."},
+{id:314,lv:3,cat:"komunikacja",o:21,t:"Powiedz przepraszam",           d:"Przeproś go za coś konkretnego – bez ale, bez tłumaczenia się, bez oczekiwania na jego reakcję. Przepraszam za... To wystarczy."},
+{id:321,lv:3,cat:"bliskość",   o:22,t:"Powiedz to głośno",             d:"Powiedz mu coś ważnego, czułego, prawdziwego – coś, co nosiłaś w sobie, a nigdy głośno nie wyraziłaś. Nie szukaj idealnego momentu. Ten jest wystarczający."},
+{id:334,lv:3,cat:"granice",    o:23,t:"Kiedy przekraczam swoje granice",d:"Napisz o sytuacji, gdy Ty sama przekroczyłaś swoje granice w tej relacji. Gdy powiedziałaś za dużo, zrobiłaś za dużo, dałaś za dużo. Co Cię do tego popychało?"},
+{id:323,lv:3,cat:"bliskość",   o:24,t:"Podziel się słabością",         d:"Powiedz mu o czymś, co Cię osłabia lub w czym czujesz się niepewna. Nie jako drama, ale jako akt zaufania. Pozwól mu zobaczyć Ciebie taką."},
+{id:346,lv:3,cat:"refleksja",  o:25,t:"Przeszkoda, która mnie buduje", d:"Opisz jedną trudność w tej relacji, która Cię czegoś nauczyła lub czegoś w Tobie rozwinęła. Co wniosła do Twojego życia ta trudność?"},
+{id:311,lv:3,cat:"komunikacja",o:26,t:"Trudna rozmowa",                d:"Podejmij rozmowę, którą odkładałaś. Zanim zaczniesz, przypomnij sobie: mówisz to, bo zależy Ci na tej relacji, nie żeby mieć rację."},
+{id:333,lv:3,cat:"granice",    o:27,t:"Granica z troską",              d:"Postaw dziś granicę w sposób troskliwy – nie agresywnie, nie przepraszająco. Powiedz: zależy mi na Tobie i potrzebuję... Jedno i drugie jest prawdą."},
+{id:341,lv:3,cat:"refleksja",  o:28,t:"Mój wkład w trudności",        d:"Napisz szczerze o swoim wkładzie w trudności tej relacji. Nie co on robi źle – co Ty wnosisz, co powtarzasz, co utrudnia. Bez samokrytyki, z ciekawością."},
+{id:331,lv:3,cat:"granice",    o:29,t:"Odmowa bez tłumaczenia",        d:"Odmów czegoś, na co nie masz ochoty. Bez długich wyjaśnień, bez poczucia winy. Zauważ, co dzieje się w Tobie zanim powiesz nie – i co czujesz po."},
+{id:336,lv:3,cat:"granice",    o:30,t:"Rozmowa o granicach",           d:"Powiedz mu o jednej granicy, której potrzebujesz – spokojnie, bez dramatu. Nie jako zarzut, ale jako informację: ważne jest dla mnie, żeby..."},
+{id:405,lv:4,cat:"obecność",   o:1, t:"Zaskocz go obecnością",         d:"Zrób coś niespodziewanego, co pokaże mu, że jesteś – nie wielkie, ale świadome. Coś, co powie: myślałam o tobie, widzę cię, jestem tu."},
+{id:403,lv:4,cat:"obecność",   o:2, t:"Bez oceniania przez tydzień",   d:"Przez tydzień powstrzymaj się od oceniania jego wyborów, decyzji, sposobu bycia. Gdy pojawi się ocena – zauważ ją, ale jej nie wyrażaj."},
+{id:442,lv:4,cat:"refleksja",  o:3, t:"Moja miłość w działaniu",       d:"Jak wyrażasz miłość? Nie jak chcesz ją wyrażać – jak faktycznie to robisz. Przez słowa, gesty, działania, obecność? Co partner widzi?"},
+{id:406,lv:4,cat:"obecność",   o:4, t:"Obecność bez słów",             d:"Spędź z nim czas w ciszy – prawdziwej, komfortowej, spokojnej. Bez potrzeby mówienia. Sprawdź, czy cisza może być bliskością."},
+{id:416,lv:4,cat:"komunikacja",o:5, t:"Czego potrzebuje ode mnie",     d:"Zapytaj go wprost: czego potrzebujesz ode mnie? I wysłuchaj. Nie broń się, nie tłumacz. Tylko słuchaj i przyjmij to, co powie."},
+{id:421,lv:4,cat:"bliskość",   o:6, t:"Tydzień otwartości",            d:"Przez tydzień codziennie powiedz mu jedną prawdziwą rzecz o sobie – uczucie, myśl, obserwację. Nie wielką, ale autentyczną. Ćwicz bycie widzianą."},
+{id:446,lv:4,cat:"refleksja",  o:7, t:"Gdzie jestem teraz",            d:"Napisz o tym, gdzie jesteś teraz w tej relacji – emocjonalnie, intencjonalnie, energetycznie. Nie gdzie chcesz być. Gdzie jesteś. Co to mówi o Tobie?"},
+{id:401,lv:4,cat:"obecność",   o:8, t:"Miesiąc uważności",             d:"Przez miesiąc codziennie przez minutę bądź w pełni obecna z partnerem. Jedna minuta, jeden moment, każdego dnia. Zapisuj, jak to zmienia relację."},
+{id:411,lv:4,cat:"komunikacja",o:9, t:"Rozmowa o nas",                 d:"Zaproś go do rozmowy o relacji – nie o problemie, ale o tym, dokąd zmierzacie, czego chcecie, co jest między Wami dobre. Zacznij od pozytywu."},
+{id:425,lv:4,cat:"bliskość",   o:10,t:"Powiedz mu o sobie teraz",      d:"Powiedz mu o tym, kim jesteś teraz – nie kim byłaś, gdy się poznaliście. Co się w Tobie zmieniło, co jest dla Ciebie ważne dziś."},
+{id:434,lv:4,cat:"granice",    o:11,t:"Moje granice się zmieniają",    d:"Napisz o tym, jak Twoje granice zmieniły się przez czas trwania tej relacji. Co stałaś się bardziej gotowa dawać? Czego teraz bardziej potrzebujesz?"},
+{id:402,lv:4,cat:"obecność",   o:12,t:"Obecna w bólu",                 d:"Gdy on przeżywa coś trudnego, nie próbuj naprawiać ani pocieszać. Tylko bądź obok. Powiedz: jestem tu. Pozwól, by to wystarczyło."},
+{id:414,lv:4,cat:"komunikacja",o:13,t:"Powiedz o miłości inaczej",     d:"Wyraź uczucia do niego w sposób, w jaki jeszcze tego nie robiłaś – przez gest, list, konkretne słowa. Nie szablonowe, ale Twoje własne."},
+{id:423,lv:4,cat:"bliskość",   o:14,t:"Zapytaj o jego historię",       d:"Zapytaj go o coś z jego przeszłości, czego jeszcze nie wiesz. Posłuchaj bez interpretowania. Pozwól mu być nieznany i ciekawy."},
+{id:443,lv:4,cat:"refleksja",  o:15,t:"Co mnie trzyma",                d:"Co sprawia, że jesteś w tej relacji? Nie co powinno Cię trzymać – co faktycznie Cię trzyma? Bądź z tym szczera i łagodna wobec siebie."},
+{id:404,lv:4,cat:"obecność",   o:16,t:"Pełna uwaga w konflikcie",      d:"W następnym konflikcie zamiast myśleć o kontrargumencie – słuchaj. Naprawdę słuchaj tego, co on mówi. Odpowiedz dopiero gdy naprawdę usłyszałaś."},
+{id:412,lv:4,cat:"komunikacja",o:17,t:"Mów o przyszłości",             d:"Porozmawiaj z nim o jednym wspólnym marzeniu lub planie. Nie planowanie logistyczne – marzenie. Gdzie chcecie być za rok, za pięć lat?"},
+{id:422,lv:4,cat:"bliskość",   o:18,t:"Podziel się historią",          d:"Opowiedz mu historię ze swojego życia, której jeszcze nie zna. Coś ważnego, formującego, prawdziwego. Pozwól mu poznać głębszą warstwę Ciebie."},
+{id:441,lv:4,cat:"refleksja",  o:19,t:"Kim jestem w tej relacji",      d:"Opisz siebie w tej relacji – nie jaką chcesz być, ale jaką jesteś. Jakie role przyjmujesz? Jakie wzorce powtarzasz? Które z nich chcesz świadomie kontynuować?"},
+{id:431,lv:4,cat:"granice",    o:20,t:"Kontrakt z sobą",               d:"Napisz dwie zasady, których chcesz przestrzegać wobec siebie w tym związku. Jak chcesz się zachowywać, jak chcesz reagować. To Twój kontrakt, nie jego."},
+{id:413,lv:4,cat:"komunikacja",o:21,t:"Przyjmij krytykę",              d:"Gdy powie coś krytycznego, zamiast się bronić – zapytaj: powiedz mi więcej. Co miałeś na myśli? Wysłuchaj do końca zanim odpiszesz."},
+{id:426,lv:4,cat:"bliskość",   o:22,t:"Widzę cię w całości",           d:"Powiedz mu o czymś, co w nim dostrzegasz – nie tylko to, co lubisz, ale też to, z czym mu jest trudno. Widzę, że... i to jest dla mnie ważne."},
+{id:433,lv:4,cat:"granice",    o:23,t:"Nie biorę jego emocji",         d:"Przez jeden dzień nie bierz odpowiedzialności za jego nastrój. Gdy jest w złym humorze – nie naprawiaj. Zapytaj: co potrzebujesz? i daj mu przestrzeń."},
+{id:424,lv:4,cat:"bliskość",   o:24,t:"Bliskość fizyczna inaczej",     d:"Przez tydzień inicjuj kontakt fizyczny w sposób, który nie jest automatyczny. Świadomy dotyk, świadoma bliskość. Obserwuj, co to zmienia."},
+{id:444,lv:4,cat:"refleksja",  o:25,t:"Mój cień w relacji",            d:"Napisz o ciemniejszej stronie siebie w tej relacji – o tym, co jest w Tobie trudne, co ranisz, co powtarzasz wbrew sobie. Bez oceniania, z odwagą."},
+{id:415,lv:4,cat:"komunikacja",o:26,t:"Rozmowa bez rozwiązania",       d:"Porozmawiajcie o czymś trudnym bez szukania rozwiązania. Celem jest tylko zrozumienie siebie nawzajem. Zakończ: dziękuję, że mi o tym powiedziałeś."},
+{id:432,lv:4,cat:"granice",    o:27,t:"Granica w trudnej chwili",      d:"Gdy będziesz zmęczona lub przytłoczona, zamiast wytrzymywać – powiedz mu o tym. Potrzebuję teraz chwili dla siebie. Granica jako akt dbałości."},
+{id:445,lv:4,cat:"refleksja",  o:28,t:"Czego się nauczyłam",           d:"Co ta relacja nauczyła Cię o miłości, o sobie, o bliskości? Napisz trzy lekcje, które zabrałabyś ze sobą nawet gdyby ta relacja się skończyła."},
+{id:435,lv:4,cat:"granice",    o:29,t:"Granica z miłością",            d:"Postaw dziś granicę i jednocześnie wyraź troskę. Nie chcę tego robić i bardzo mi na Tobie zależy. Sprawdź, że jedno nie wyklucza drugiego."},
+{id:436,lv:4,cat:"granice",    o:30,t:"Moje potrzeby długoterminowo",  d:"Napisz o potrzebach, które masz w tej relacji długoterminowo. Nie na dziś – za rok, za pięć lat. Czy one są wyrażone? Czy partner o nich wie?"},
+{id:504,lv:5,cat:"obecność",   o:1, t:"Uważność w codzienności",       d:"Przez tydzień traktuj każdą zwykłą czynność z nim jako okazję do bycia razem – gotowanie, spacer, cisza przed snem. Zwykłe chwile jako praktyka bliskości."},
+{id:501,lv:5,cat:"obecność",   o:2, t:"Obecność jako praktyka",        d:"Stwórz własny rytuał obecności – coś, co robisz regularnie, żeby wrócić do siebie przed kontaktem z nim. Ciało, oddech, chwila ciszy. Twój sposób na bycie tu."},
+{id:544,lv:5,cat:"refleksja",  o:3, t:"Czego nauczyła mnie ta praca",  d:"Jakie trzy największe lekcje wyniosłaś z tej pracy nad sobą i relacją? Nie ogólne – konkretne, osobiste, Twoje."},
+{id:503,lv:5,cat:"obecność",   o:4, t:"Obecność w radości",            d:"Bądź w pełni obecna przy jego radości. Nie minimalizuj, nie zazdrość, nie odwracaj uwagi na siebie. Tylko bądź z nim w tym, co dobre."},
+{id:513,lv:5,cat:"komunikacja",o:5, t:"Słucham cię w całości",         d:"Przez tydzień praktykuj słuchanie go w całości – nie tylko słów, ale tonu, ciała, tego co niewypowiedziane. Co słyszysz, gdy słuchasz naprawdę?"},
+{id:525,lv:5,cat:"bliskość",   o:6, t:"Celebruj to, co macie",         d:"Zrób coś, co świętuje Waszą relację – nie rocznicę, nie okazję, po prostu to, że jesteście. Może wspólny posiłek, może chwila, może gest. Świętowanie jako praktyka."},
+{id:533,lv:5,cat:"granice",    o:7, t:"Wolność w relacji",             d:"Napisz o tym, co wolność znaczy dla Ciebie w tej relacji. Jak być blisko i zachować siebie. Gdzie jest granica między bliskością a utratą siebie?"},
+{id:502,lv:5,cat:"obecność",   o:8, t:"Bądź świadkiem jego życia",     d:"Przez miesiąc świadomie bądź świadkiem jego codzienności – bez oceniania, bez naprawiania. Tylko widzieć. Na koniec powiedz mu, co widziałaś."},
+{id:511,lv:5,cat:"komunikacja",o:9, t:"Rozmowa o tym, co między nami", d:"Zaproś go do głębokiej rozmowy o tym, co jest między Wami – co działa, co wymaga uwagi, czego chcecie razem. Bez oskarżeń, z troską i odwagą."},
+{id:521,lv:5,cat:"bliskość",   o:10,t:"Bliskość bez potrzeby",         d:"Bądź blisko niego bez żadnej potrzeby ani oczekiwania. Bez potrzeby zmiany, potwierdzenia, odpowiedzi. Tylko bliskość jako stan, nie jako narzędzie."},
+{id:531,lv:5,cat:"granice",    o:11,t:"Moje zasady na zawsze",         d:"Napisz zasady, których chcesz przestrzegać w tej relacji przez długi czas. Nie zasady dla niego – zasady dla siebie. Jak chcesz kochać? Jak chcesz być?"},
+{id:506,lv:5,cat:"obecność",   o:12,t:"Pełna obecność przez miesiąc",  d:"Przez miesiąc codziennie zadawaj sobie pytanie: jak byłam dziś obecna? Nie oceniaj – tylko obserwuj. Na koniec miesiąca napisz, co się zmieniło."},
+{id:515,lv:5,cat:"komunikacja",o:13,t:"Nasza wspólna historia",        d:"Opowiedz mu historię Waszej relacji tak, jak ją widzisz – z początkiem, środkiem, teraz. Co jest w tej historii piękne? Co trudne? Czego chcesz w kolejnym rozdziale?"},
+{id:522,lv:5,cat:"bliskość",   o:14,t:"Pokochaj go takim, jaki jest",  d:"Przez tydzień świadomie akceptuj go takim, jaki jest – bez chęci zmieniania, naprawiania, ulepszania. Napisz, co odkryłaś, gdy przestałaś chcieć inaczej."},
+{id:542,lv:5,cat:"refleksja",  o:15,t:"Kto jestem teraz",              d:"Opisz siebie jako partnerkę teraz. Co się zmieniło w Tobie? Co chcesz dalej rozwijać? Jak różnisz się od siebie sprzed tej pracy?"},
+{id:505,lv:5,cat:"obecność",   o:16,t:"List o obecności",              d:"Napisz mu list o tym, jak zmieniła się Twoja obecność w tej relacji. Co się zmieniło w Tobie. Co teraz możesz mu ofiarować, czego wcześniej nie mogłaś."},
+{id:514,lv:5,cat:"komunikacja",o:17,t:"Komunikacja bez ochrony",       d:"W jednej rozmowie zrezygnuj ze swoich mechanizmów obronnych. Nie broń się, nie atakuj, nie uciekaj. Tylko bądź otwarta i mów prawdę."},
+{id:524,lv:5,cat:"bliskość",   o:18,t:"Pozwól mu być przy mnie",       d:"Gdy będzie Ci trudno, pozwól mu być przy sobie. Nie udawaj, że wszystko dobrze. Powiedz: jest mi ciężko i chcę, żebyś był blisko. Ćwicz przyjmowanie."},
+{id:534,lv:5,cat:"granice",    o:19,t:"Moje potrzeby, moja odpowiedzialność",d:"Napisz o tym, jak bierzesz odpowiedzialność za swoje potrzeby – jak je wyrażasz, jak o nie dbasz, jak prosisz o pomoc bez oczekiwania, że on je zgadnie."},
+{id:543,lv:5,cat:"refleksja",  o:20,t:"Moja miłość ewoluuje",          d:"Napisz o tym, jak ewoluowała Twoja zdolność do miłości przez czas tej pracy. Co w Tobie się otworzyło? Co się wzmocniło? Co jeszcze chcesz rozwinąć?"},
+{id:512,lv:5,cat:"komunikacja",o:21,t:"Powiedz mu wszystko",           d:"Powiedz mu jedną rzecz, której nigdy nie powiedziałaś – coś ważnego, może trudnego, może czułego. Coś, co nosiłaś długo. Czas to powiedzieć."},
+{id:526,lv:5,cat:"bliskość",   o:22,t:"Głęboka wdzięczność",           d:"Napisz mu o głębokiej wdzięczności – nie za rzeczy, które robi, ale za to, kim jest i co wnosi do Twojego życia. Powiedz mu to."},
+{id:532,lv:5,cat:"granice",    o:23,t:"Granica jako troska o nas",     d:"Napisz o tym, jak Twoje granice chronią nie tylko Ciebie, ale i relację. Jak dbanie o siebie jest dbaniem o Was. Zapisz to i podziel się z nim."},
+{id:523,lv:5,cat:"bliskość",   o:24,t:"Moja miłość w słowach",         d:"Napisz mu list o miłości – prawdziwy, osobisty, bez szablonów. O tym, jak go kochasz. Nie ogólnie, ale konkretnie, przez pryzmat małych codziennych rzeczy."},
+{id:541,lv:5,cat:"refleksja",  o:25,t:"Moja droga",                    d:"Napisz o całej swojej drodze w tej aplikacji. Co się zmieniło? Co odkryłaś? Jakie wyzwania były najtrudniejsze i dlaczego? Co zabrałabyś z tej drogi?"},
+{id:516,lv:5,cat:"komunikacja",o:26,t:"Słowa, które zmieniają wszystko",d:"Powiedz mu trzy zdania, które zawsze chciałaś powiedzieć, a nie mówiłaś. Mogą być czułe, trudne, odważne. Twoje własne słowa, Twoja własna prawda."},
+{id:535,lv:5,cat:"granice",    o:27,t:"Dojrzała miłość",               d:"Napisz o tym, co rozumiesz przez dojrzałą miłość – nie zauroczenie, nie potrzebę, ale świadomy wybór. Jak wygląda dojrzała miłość w Twoim życiu?"},
+{id:545,lv:5,cat:"refleksja",  o:28,t:"Moje intencje na przyszłość",   d:"Napisz trzy intencje na kolejny rok w tej relacji. Nie cele, nie plany – intencje. Jak chcesz być? Co chcesz praktykować? Kim chcesz się stawać?"},
+{id:536,lv:5,cat:"granice",    o:29,t:"List do siebie za rok",         d:"Napisz list do siebie za rok. Co chcesz, żebyś osiągnęła w tej relacji? Kim chcesz być jako partnerka? Co chcesz powiedzieć sobie z przyszłości?"},
+{id:546,lv:5,cat:"refleksja",  o:30,t:"Dziękuję sobie",                d:"Napisz list z podziękowaniem dla siebie – za odwagę pracy nad relacją, za szczerość wobec siebie, za każdy mały krok. Podziękuj sobie tak, jak podziękowałabyś bliskiej przyjaciółce."},
+];
+
+// ── STATE ──
+let completedIds=[],reflections={},streakData={};
+let currentLevel=1,currentSubtab='todo',currentChallenge=null;
+
+function sv(k,v){try{localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));}catch(e){}}
+function ld(k,d){try{const v=localStorage.getItem(k);return v!==null?v:d;}catch(e){return d;}}
+function loadAll(){
+  completedIds=JSON.parse(ld('bs5_ids','[]'));
+  reflections=JSON.parse(ld('bs5_refs','{}'));
+  streakData=JSON.parse(ld('bs5_streak','{"last":null,"streak":0}'));
+}
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function updateStreak(){
+  const today=todayStr();
+  if(streakData.last===today)return;
+  const prev=new Date();prev.setDate(prev.getDate()-1);
+  streakData.streak=(streakData.last===prev.toISOString().slice(0,10))?(streakData.streak||0)+1:1;
+  streakData.last=today;
+  sv('bs5_streak',streakData);
+}
+
+function getLevelDone(lv){return C.filter(c=>c.lv===lv&&completedIds.includes(c.id)).length;}
+function isUnlocked(lv){return lv===1||getLevelDone(lv-1)>=30;}
+function getActiveLv(){let l=1;for(let i=1;i<=5;i++){if(isUnlocked(i))l=i;}return l;}
+
+// ── STARS ──
+function buildStars(){
+  const el=document.getElementById('stars');
+  for(let i=0;i<55;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*2+0.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--min:${(Math.random()*0.08).toFixed(2)};--max:${(Math.random()*0.45+0.05).toFixed(2)};--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*6).toFixed(1)}s`;
+    el.appendChild(s);
+  }
+}
+
+// ── UI UPDATE ──
+function updateUI(){
+  const lv=currentLevel,done=getLevelDone(lv),meta=LM[lv-1];
+  const pct=Math.round((done/30)*100);
+  // level hero
+  document.getElementById('levelOrb').textContent=meta.icon;
+  document.getElementById('levelName').textContent=meta.name;
+  document.getElementById('levelSub').textContent='Poziom '+lv+(lv<5?' · далеко до '+LM[lv].name:'');
+  document.getElementById('levelSub').textContent='Poziom '+lv;
+  document.getElementById('fracDone').textContent=done;
+  document.getElementById('progPct').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=pct+'%';
+  // stats
+  document.getElementById('statStreak').textContent=streakData.streak||0;
+  document.getElementById('statDone').textContent=completedIds.length;
+}
+
+function animStat(id){const el=document.getElementById(id);el.classList.remove('anim');void el.offsetWidth;el.classList.add('anim');setTimeout(()=>el.classList.remove('anim'),500);}
+
+// ── LEVEL TABS ──
+function renderLevelTabs(){
+  const el=document.getElementById('levelTabs');el.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const un=isUnlocked(i),done=getLevelDone(i);
+    const b=document.createElement('button');
+    b.className='lvl-tab'+(i===currentLevel?' active':'')+(un&&done>=30?' complete':'')+(un?'':' locked');
+    b.textContent=(un?'':'🔒 ')+LM[i-1].icon+' '+(i===currentLevel?LM[i-1].name:'Lvl '+i)+(un?' '+done+'/30':'');
+    if(un){const x=i;b.onclick=()=>setLevel(x);}
+    el.appendChild(b);
+  }
+}
+
+function setLevel(lv){if(!isUnlocked(lv))return;currentLevel=lv;updateUI();renderLevelTabs();renderList();}
+function setSubtab(t){currentSubtab=t;document.getElementById('subtab-todo').classList.toggle('active',t==='todo');document.getElementById('subtab-done').classList.toggle('active',t==='done');renderList();}
+
+// ── LIST ──
+const cardAnim=document.createElement('style');
+cardAnim.textContent='@keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}';
+document.head.appendChild(cardAnim);
+
+function renderList(){
+  const el=document.getElementById('list');el.innerHTML='';
+  if(!isUnlocked(currentLevel)){
+    const need=30-getLevelDone(currentLevel-1);
+    el.innerHTML=`<div class="locked-screen"><span class="locked-glyph">◌</span><div class="locked-title">Ten etap jeszcze czeka</div><div class="locked-sub">Ukończ jeszcze ${need} zadań z poziomu ${currentLevel-1},<br/>aby otworzyć tę ścieżkę.</div></div>`;
+    return;
+  }
+  const pool=C.filter(c=>c.lv===currentLevel).sort((a,b)=>(a.o||0)-(b.o||0));
+  const items=currentSubtab==='todo'
+    ?pool.filter(c=>!completedIds.includes(c.id))
+    :pool.filter(c=>completedIds.includes(c.id));
+  if(!items.length){
+    el.innerHTML=currentSubtab==='todo'
+      ?'<div class="empty"><span class="empty-glyph">✦</span>Wszystkie zadania tego etapu ukończone.<br/>Poziom zamknięty.</div>'
+      :'<div class="empty"><span class="empty-glyph">◌</span>Jeszcze żadnych ukończonych<br/>zadań na tym poziomie.</div>';
+    return;
+  }
+  items.forEach((c,i)=>{
+    const card=makeCard(c);
+    card.style.animation=`cardIn 0.32s ease ${i*0.04}s both`;
+    el.appendChild(card);
+  });
+}
+
+function makeCard(c){
+  const cat=CATS[c.cat]||CATS.refleksja;
+  const done=completedIds.includes(c.id);
+  const ref=reflections[c.id]||'';
+  const div=document.createElement('div');
+  div.className='card'+(done?' done':'');
+  div.setAttribute('data-cat',c.cat);
+  div.onclick=()=>openModal(c);
+  div.innerHTML=`<div class="card-shimmer"></div>
+    <div class="card-header">
+      <div class="card-title">${c.t}</div>
+      <div class="card-check" style="border-color:${done?cat.color:'#c9a96e12'};color:${cat.color};background:${done?cat.color+'18':'transparent'}">${done?'✓':''}</div>
+    </div>
+    <div class="card-footer">
+      <span class="cat-tag" style="background:${cat.color}14;color:${cat.color}">${cat.label}</span>
+    </div>
+    ${ref?`<div class="card-reflection">${ref}</div>`:''}`;
+  return div;
+}
+
+// ── MODAL ──
+function openModal(c){
+  currentChallenge=c;
+  const cat=CATS[c.cat]||CATS.refleksja;
+  document.getElementById('mCatDot').style.background=cat.color;
+  document.getElementById('mCatLabel').style.color=cat.color;
+  document.getElementById('mCatLabel').textContent=cat.label;
+  document.getElementById('mTitle').textContent=c.t;
+  document.getElementById('mDesc').textContent=c.d;
+  document.getElementById('mLevel').textContent='Poziom '+c.lv+' · '+LM[c.lv-1].name;
+  document.getElementById('reflectionInput').value=reflections[c.id]||'';
+  const done=completedIds.includes(c.id);
+  const btn=document.getElementById('btnComplete');
+  btn.className='btn '+(done?'btn-done':'btn-ready');
+  btn.textContent=done?'✓ Ukończone':'✓ Oznacz jako ukończone';
+  document.getElementById('overlay').classList.remove('hidden');
+  document.querySelector('.modal').scrollTop=0;
+}
+function handleOverlayClick(e){if(e.target===document.getElementById('overlay'))closeModal();}
+function closeModal(){document.getElementById('overlay').classList.add('hidden');currentChallenge=null;}
+
+function saveReflection(){
+  if(!currentChallenge)return;
+  const ref=document.getElementById('reflectionInput').value.trim();
+  if(!ref)return;
+  reflections[currentChallenge.id]=ref;
+  sv('bs5_refs',reflections);
+  showToast('Refleksja zapisana ✦');
+  renderList();
+}
+
+function handleComplete(){
+  if(!currentChallenge||completedIds.includes(currentChallenge.id)){closeModal();return;}
+  const ref=document.getElementById('reflectionInput').value.trim();
+  if(ref){reflections[currentChallenge.id]=ref;sv('bs5_refs',reflections);}
+  completedIds.push(currentChallenge.id);
+  sv('bs5_ids',completedIds);
+  updateStreak();
+  const wasLv=currentLevel;
+  updateUI();animStat('statDone');animStat('statStreak');
+  renderLevelTabs();renderList();
+  closeModal();
+  if(getLevelDone(wasLv)>=30) setTimeout(()=>showCelebrate(wasLv),300);
+}
+
+// ── CELEBRATE ──
+function showCelebrate(lv){
+  const final=lv>=5;
+  const next=LM[lv]||null;
+  document.getElementById('celebIcon').textContent=final?'❋':(next?next.icon:'✦');
+  document.getElementById('celebTitle').textContent=final?'Bliska ❋':'Poziom '+lv+' ukończony';
+  document.getElementById('celebSub').textContent=final
+    ?'Przeszłaś całą drogę. Jesteś Bliska – sobie i jemu.'
+    :'Otwierasz '+next.name+'. Twoja droga idzie głębiej.';
+  // particles
+  const pc=document.getElementById('particles');pc.innerHTML='';
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');p.className='particle';
+    const a=Math.random()*360,dist=70+Math.random()*110;
+    p.style.cssText=`left:50%;top:40%;width:${3+Math.random()*3}px;height:${3+Math.random()*3}px;background:${Math.random()>.5?'#c9a96e':'#e8d0a0'};--px:${Math.cos(a*Math.PI/180)*dist}px;--py:${Math.sin(a*Math.PI/180)*dist}px;--pd:${.5+Math.random()*.8}s;--pde:${Math.random()*.3}s`;
+    pc.appendChild(p);
+  }
+  document.getElementById('celebrate').classList.remove('hidden');
+}
+function closeCelebrate(){
+  document.getElementById('celebrate').classList.add('hidden');
+  const newLv=getActiveLv();
+  if(newLv!==currentLevel){currentLevel=newLv;updateUI();renderLevelTabs();renderList();}
+}
+
+// ── TOAST ──
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+
+// ── INIT ──
+buildStars();
+loadAll();
+currentLevel=getActiveLv();
+updateUI();renderLevelTabs();renderList();
+</script>
+
+</body>
+</html>
